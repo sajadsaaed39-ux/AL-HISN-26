@@ -1,0 +1,42 @@
+name: Build Al-Hisn APK
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install buildozer cython git+https://github.com/kivy/kivy.git@master
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libsqlite3-dev sqlite3 bzip2 libbz2-dev zlib1g-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev liblzma-dev libreadline-dev libncursesw5-dev libffi-dev uuid-dev libffi7
+
+      - name: Build with Buildozer
+        run: |
+          # إنشاء ملف الإعدادات وإعداد اسم اللعبة
+          buildozer init
+          sed -i 's/package.name = myapp/package.name = alhisn26/' buildozer.spec
+          sed -i 's/package.domain = org.test/package.domain = org.alhisn/' buildozer.spec
+          sed -i 's/title = My Application/title = Al-Hisn 26 Super Elite/' buildozer.spec
+          # تعديل المتطلبات لتشمل kivy
+          sed -i 's/requirements = python3,kivy/requirements = python3,kivy,hostpython3/' buildozer.spec
+          # بدء البناء الفعلي
+          buildozer -v android debug
+        
+      - name: Upload APK
+        uses: actions/upload-artifact@v2
+        with:
+          name: Al-Hisn-Game-APK
+          path: bin/*.apk
+          
