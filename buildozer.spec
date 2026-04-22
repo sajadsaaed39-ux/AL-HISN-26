@@ -1,23 +1,34 @@
-[app]
-title = Al-Hisn 26 Super Elite
-package.name = alhisn26
-package.domain = org.alhisn
-source.dir = .
-source.include_exts = py,png,jpg,kv,atlas
+name: Build AL-HISN 26 APK
+on: [push, pull_request]
 
-version = 1.0.0
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-requirements = python3,kivy,pillow
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-orientation = portrait
-fullscreen = 0
-android.permissions = INTERNET,ACCESS_NETWORK_STATE
-android.api = 31
-android.minapi = 21
-android.ndk = 25b
-android.accept_sdk_license = True
-android.arch = armeabi-v7a
+      - name: Install Buildozer dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+          pip install --user --upgrade buildozer cython virtualenv
 
-[buildozer]
-log_level = 2
-warn_on_root = 1
+      - name: Build with Buildozer
+        run: |
+          yes | buildozer -v android debug
+        continue-on-error: false
+
+      - name: Upload APK
+        uses: actions/setup-node@v4 # لضمان توافق البيئة
+      
+      - name: Final Step - Upload Artifact
+        uses: actions/upload-artifact@v4 # هنا التحديث الهام لنسخة v4
+        with:
+          name: Al-Hisn-Game-APK
+          path: bin/*.apk
+          
