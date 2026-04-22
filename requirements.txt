@@ -1,0 +1,4 @@
+kivy==2.2.1
+buildozer==1.4.6
+cython==0.29.36
+pillow==10.0.0
